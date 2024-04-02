@@ -5,13 +5,16 @@
 #include <vector>
 #include <random>
 #include <limits>
+#include <chrono>
 
-// Mersenne-Twister algorithm
-std::mt19937 mt;
+// Global vars
+std::mt19937 mt; // Mersenne-Twister algorithm
 const int MAX_NUM = std::numeric_limits<int>::max();
 
+// Function declerations
+std::chrono::_V2::system_clock::time_point SpawnThreads(int, int);
 void RandomNum(int);
-void spawnThreads(int, int);
+
 
 int main() {
     int init, thrd, times;
@@ -27,13 +30,18 @@ int main() {
 
     std::cout << "Amount of threads to create (0 for the maximum interger): ";
     std::cin >> thrd;
-    if (thrd == 0) {thrd = MAX_NUM;}
-    spawnThreads(thrd, times);
+    if (thrd == 0) {thrd = MAX_NUM;};
+
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    const std::chrono::duration<double, std::milli> fp_ms = SpawnThreads(thrd, times) - t1;
+    std::cout << "Program took: " << fp_ms.count() << " ms." << std::endl;
+
+    return 0;
 }
 
-
 // Functions
-void spawnThreads(int thrd, int times) {
+std::chrono::_V2::system_clock::time_point SpawnThreads(int thrd, int times) {
     std::vector<std::thread> threads(thrd);
     
     for (int i = 0; i < thrd; i++) {
@@ -43,6 +51,10 @@ void spawnThreads(int thrd, int times) {
     for (auto& th : threads) {
         th.join();
     }
+
+    std::cout << std::endl;
+
+    return std::chrono::high_resolution_clock::now();
 }
 
 void RandomNum(int times) {
