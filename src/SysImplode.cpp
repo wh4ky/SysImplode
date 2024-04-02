@@ -1,49 +1,40 @@
+#include <ctime>
 #include <thread>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <random>
 
-int g_state{0};
+// Mersenne twister algorithm
+std::mt19937 mt;
 
-void seed(int);
-int PRNG();
-void RandomInterger();
+void RandomNum();
 void spawnThreads(int);
 
 int main() {
-    int x, y;
+    int init, thrd;
 
-    std::cout << "seed value: ";
-    std::cin >> x;
-    seed(x);
+    std::cout << "seed value (0 for semi-random seed): ";
+    std::cin >> init;
+    if (init == 0) {init = time(nullptr);}
+    mt.seed(init);
 
     std::cout << "ammount of threads: ";
-    std::cin >> y;
-    spawnThreads(y);
+    std::cin >> thrd;
+    spawnThreads(thrd);
 }
 
 
 // Functions
-void seed(int seed) {
-    g_state = seed;
-}
-
-int PRNG() {
-    g_state = 8253729 * g_state + 2396403;
-    return g_state % 32768;
-}
-
-void RandomInterger() {
-    for (int count{ 1 }; count <= 4; ++count) {
-        std::cout << PRNG() << '\n';
-    }
+void RandomNum() {
+    std::cout << mt();
 }
 
 void spawnThreads(int n) {
     std::vector<std::thread> threads(n);
     
     for (int i = 0; i < n; i++) {
-        threads[i] = std::thread(RandomInterger);
+        threads[i] = std::thread(RandomNum);
     }
 
     for (auto& th : threads) {
