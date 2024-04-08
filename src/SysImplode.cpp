@@ -1,64 +1,83 @@
-#include <ctime>
-#include <thread>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <random>
-#include <limits>
 #include <chrono>
+#include <iostream>
+#include <random>
+#include <thread>
+#include <vector>
 
 // Global vars
-std::mt19937 mt; // Mersenne-Twister algorithm
-const int MAX_NUM = std::numeric_limits<int>::max();
+std::mt19937_64 mt; // Mersenne-Twister algorithm
+const unsigned long long MAX_NUM =
+	std::numeric_limits<unsigned long long>::max();
 
 // Function declerations
-std::chrono::_V2::system_clock::time_point SpawnThreads(int, int);
-void RandomNum(int);
+std::chrono::_V2::system_clock::time_point
+	SpawnThreads(unsigned long long, unsigned long long, bool);
+void RandomNum(unsigned long long);
+void RandomNumInf();
 
-
+// Main
 int main() {
-    int init, thrd, times;
+    unsigned long long thrd, times;
+	mt.seed(std::random_device()());
+	std::vector<std::thread> VEC_MAX;
+	bool inf = false;
 
-    std::cout << "Seed value to use (0 for a semi-random seed): ";
-    std::cin >> init;
-    if (init == 0) {init = time(nullptr);}
-    mt.seed(init);
+	std::cout << "Max number: " << MAX_NUM << std::endl;
+	std::cout << "Max thread number: "
+		<< VEC_MAX.max_size() << std::endl << std::endl;
 
-    std::cout << "How many times to run the algorithm (0 for the maximum interger): ";
-    std::cin >> times;
-    if (times == 0) {times = MAX_NUM;}
+	std::cout << "How many times to run the algorithm:\n-1 for the maximum interger (2^64)\n0 for infinite\n";
+	std::cin >> times;
+	if (times == 0) {inf = true;}
 
-    std::cout << "Amount of threads to create (0 for the maximum interger): ";
-    std::cin >> thrd;
-    if (thrd == 0) {thrd = MAX_NUM;};
+	std::cout << "Amount of threads to create:\n0 for the maximum interger (2^60)\n";
+	std::cin >> thrd;
+	if (thrd == 0) {thrd = VEC_MAX.max_size();}
 
-    auto t1 = std::chrono::high_resolution_clock::now();
+	auto t1 = std::chrono::high_resolution_clock::now();
 
-    const std::chrono::duration<double, std::milli> fp_ms = SpawnThreads(thrd, times) - t1;
-    std::cout << "Program took: " << fp_ms.count() << " ms." << std::endl;
+	const std::chrono::duration<double, std::milli> ms =
+		SpawnThreads(thrd, times, inf) - t1;
+		
+	std::cout << "Program took: " << ms.count() << " ms." << std::endl;
 
-    return 0;
+	return 0;
 }
 
 // Functions
-std::chrono::_V2::system_clock::time_point SpawnThreads(int thrd, int times) {
-    std::vector<std::thread> threads(thrd);
-    
-    for (int i = 0; i < thrd; i++) {
-        threads[i] = std::thread(RandomNum, times);
-    }
+std::chrono::_V2::system_clock::time_point
+SpawnThreads(unsigned long long thrd, unsigned long long times, bool inf) {
+	std::vector<std::thread> threads(thrd);
 
-    for (auto& th : threads) {
-        th.join();
-    }
+	if (inf) {for (unsigned long long i = 0; i < thrd; i++) {
+		threads[i] = std::thread(RandomNumInf);
+	}}
+	
+	else {for (unsigned long long i = 0; i < thrd; i++) {
+		threads[i] = std::thread(RandomNum, times);
+	}}
 
-    std::cout << std::endl;
+	for (auto &th : threads) {
+		th.join();
+	}
 
-    return std::chrono::high_resolution_clock::now();
+	std::cout << std::endl;
+
+	return std::chrono::high_resolution_clock::now();
 }
 
-void RandomNum(int times) {
-    for (int i = 0; i < times; i++) {
-        std::cout << mt();
-    }
+void RandomNum(unsigned long long times) {
+	for (unsigned long long i = 0; i < times; i++) {
+		auto v = mt();
+		std::cout << v;
+		mt.seed(v);
+	}
+}
+
+void RandomNumInf() {
+	while(true) {
+		auto v = mt();
+		std::cout << v;
+		mt.seed(v);
+	}
 }
