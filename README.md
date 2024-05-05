@@ -19,7 +19,7 @@ This is a program made to overload a system by generating up to an infinite amou
 
 ## Future Development
 
-Planned enhancements include utilizing the GPU for massively parallel number generation to maximize system load. Integration with distributed computing frameworks will also be explored to expand the program's capabilities across multiple machines. Additional command line arguments and better error handling are also on the roadmap.
+Planned enhancements include utilizing the GPU for massively parallel number generation to maximize system load. Additional command line arguments and better error handling are also on the roadmap.
 
 ## Downloads
 
